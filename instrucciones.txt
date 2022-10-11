@@ -1,0 +1,15 @@
+4 en Línea 
+Realizar un programa que simule un juego de 4 en Línea con las siguientes características:
+1. El tablero será de 15x15
+2. Las posiciones serán numéricas (Ejemplo: Fila 1 / Columna 1)
+3. Los 2 jugadores jugarán por turnos hasta que uno de ellos logre posicionar 4 
+fichasiguales en línea (horizontal, vertical, diagonal).
+4. Existirá la posibilidad de guardar la partida. Se guardará en un archivo el 
+tablero indicando 0 donde no hay ficha, 1 donde hay fichas blancas y 
+2 donde hay fichas negras.
+
+
+
+----VER PODIO----
+No llega a poner el tercer puesto correctamente anashei god vamos boca junior papa 
+román + q messi
