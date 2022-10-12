@@ -11,6 +11,10 @@ bool cuatroEnLinea(vector<vector<int>>matriz, int &jugadorGanador){
     int cantenDiagonalM = 0;
     for(int i = 0; i < matriz.size(); i++){
         for(int j = 0; j < matriz[i].size(); j++){
+            cantenFila = 0;
+            cantenColumna = 0;
+            cantenDiagonalP = 0;
+            cantenDiagonalM = 0;
             if(matriz[i][j]==1){
                 for(int enFila = j; enFila < matriz[i].size() && matriz[i][enFila]==1 ;enFila++){
                     cantenFila++;
@@ -57,7 +61,7 @@ bool cuatroEnLinea(vector<vector<int>>matriz, int &jugadorGanador){
                 for(int enDiagonalP = 0;(i + enDiagonalP) < matriz.size() && (j + enDiagonalP) < matriz.size() && matriz[i + enDiagonalP][j+enDiagonalP]==1;enDiagonalP++){
                     cantenDiagonalP++;
                 }
-                for(int enDiagonalP = 1; (i + enDiagonalP) >= 0 && (j + enDiagonalP) >= 0 && matriz[i - enDiagonalP][j - enDiagonalP]==1;enDiagonalP++){
+                for(int enDiagonalP = 1; (i - enDiagonalP) >= 0 && (j - enDiagonalP) >= 0 && matriz[i - enDiagonalP][j - enDiagonalP]==1;enDiagonalP++){
                     cantenDiagonalP++;
                 }
                 for(int enDiagonalM = 0; (i - enDiagonalM) >= 0 && (j + enDiagonalM) < matriz[i].size() && matriz[i - enDiagonalM][j + enDiagonalM]==1 ; enDiagonalM++){
@@ -76,8 +80,75 @@ bool cuatroEnLinea(vector<vector<int>>matriz, int &jugadorGanador){
     return false;
 }
 
+void sumarPuntuacion (string nombre){
+    ifstream registroLectura;
+    ofstream registroEscritura;
+    string linea;
+    int lineaInt;
+    string ruta_archivo = "usuarios.txt";
+    string nuevo_nombre = "usuarios2.txt";
+    rename(ruta_archivo.c_str(), nuevo_nombre.c_str());
+    registroEscritura.open(ruta_archivo, ios::app);
+    registroLectura.open(nuevo_nombre);
+    while (getline(registroLectura, linea, ';')){
+        registroEscritura << linea << ";";
+        getline(registroLectura, linea, ';');
+        registroEscritura << linea << ";";
+        if(linea==nombre) {
+            getline(registroLectura, linea, ';');
+            lineaInt = stoi(linea);
+            lineaInt++;
+            registroEscritura << lineaInt << ";";
+        }
+        else{
+            getline(registroLectura, linea, ';');
+            registroEscritura << linea << ";";
+        }
+    }
+    registroLectura.close();
+    remove(nuevo_nombre.c_str()); 
+}
+
+void borrarPartida (string nombre){
+    ifstream registroLectura;
+    ofstream registroEscritura;
+    string linea;
+    int lineaInt;
+    string ruta_archivo = "partidas.txt";
+    string nuevo_nombre = "partidas2.txt";
+    rename(ruta_archivo.c_str(), nuevo_nombre.c_str());
+    registroEscritura.open(ruta_archivo, ios::app);
+    registroLectura.open(nuevo_nombre);
+    while (getline(registroLectura, linea, ':')){
+        registroEscritura << linea << ":";
+        getline(registroLectura, linea, ':');
+        if(linea==nombre) {
+            for(int i = 1; i<15; i++){
+                getline(registroLectura, linea, ':');
+            }
+        }
+        else{
+            registroEscritura << linea << ":";
+        }
+    }
+    registroLectura.close();
+    remove(nuevo_nombre.c_str()); 
+}
+
+void guardarPartida(vector<vector<int>>&matriz, string nombreUsuario, string nombreUsuario2){
+    ofstream archivo;
+    archivo.open("partidas.txt", ios::app);
+    archivo<<endl<<":"<<nombreUsuario<<" vs "<<nombreUsuario2<<":";
+    for(int i = 0; i<matriz.size(); i++){
+        archivo<<endl;
+        for(int j = 0; j <matriz[i].size(); j++){
+            archivo<<matriz[i][j]<<" ";
+        }
+    }
+}
+
 void mostrarTablero(vector<vector<int>>matriz){
-    cout<<"|  ||1||2||3||4||5||6||7||8||9||10||11||12||13||14||15|"<<endl;
+    cout<<"|  ||1 ||2 ||3 ||4 ||5 ||6 ||7 ||8 ||9 ||10||11||12||13||14||15|"<<endl;
     for(int i = 0; i<matriz.size() ; i++){
         if(i+1 < 10){
             cout<<"|"<<i+1<<" |";
@@ -87,21 +158,22 @@ void mostrarTablero(vector<vector<int>>matriz){
         }
         for(int j = 0; j<matriz[i].size(); j++){
             if(matriz[i][j]==0){
-                cout<<"| |";
+                cout<<"|  |";
             }
             else if(matriz[i][j] == 1){
-                cout<<"|X|";
+                cout<<"|X |";
             }
             else if(matriz[i][j] == 2){
-                cout<<"|O|";
+                cout<<"|O |";
             }
         }
         cout<<endl;
     }
 }
 
-void juego(vector<vector<int>>matriz, string nombreUsuario, string nombreUsuario2){
+string juego(vector<vector<int>>&matriz, string nombreUsuario, string nombreUsuario2){
     int jugadorGanador = 0;
+    string seguir;
     while(!cuatroEnLinea(matriz, jugadorGanador)){
         mostrarTablero(matriz);
         int columna;
@@ -124,20 +196,34 @@ void juego(vector<vector<int>>matriz, string nombreUsuario, string nombreUsuario
                 }
             }
         }
+        cout<<"¿Quieren seguir jugando?(S/N)"<<endl;
+        cin>>seguir;
+        if(seguir == "N" || seguir == "n") {
+            return seguir;
+        } 
     }
+    mostrarTablero(matriz);
+    if(jugadorGanador==1){
+        cout<<"Gano "<<nombreUsuario<<endl;
+        sumarPuntuacion(nombreUsuario);
+    }
+    else{
+        cout<<"Gano "<<nombreUsuario2<<endl;
+        sumarPuntuacion(nombreUsuario2);
+    }
+    return "S";
 }
 
 bool chequearPartida(string nombre){
     ifstream archivo;
     string linea;
-    bool esta = false;
     archivo.open("partidas.txt");
     while(getline(archivo, linea, ':')) {
         if(linea == nombre){
-            esta = true; 
+            return true;
         }
     }
-    return esta;
+    return false;
 }
 
 bool chequear(string nombre){
@@ -155,7 +241,7 @@ bool chequear(string nombre){
 void crearUsuario(string nombre){
     ofstream archivo;
     archivo.open("usuarios.txt", ios::app);
-    archivo <<";" << nombre << ";" << "0" <<endl;
+    archivo <<endl<<";" << nombre << ";" << "0" << ";";
 }
 
 void cargarPartida(string nombreUsuario, string nombreUsuario2){
@@ -164,11 +250,11 @@ void cargarPartida(string nombreUsuario, string nombreUsuario2){
     ifstream archivo;
     int n;
     string linea;
+    string seguir;
     vector<int>v1;
-    nombrePartida= nombreUsuario + " vs " + nombreUsuario2 + ":";
+    nombrePartida= nombreUsuario + " vs " + nombreUsuario2;
     vector<vector<int>>matriz;
-    esta = chequearPartida(nombrePartida);
-    if(esta){
+    if(chequearPartida(nombrePartida)){
         archivo.open("partidas.txt");
         while(getline(archivo, linea, ':')){
             if(nombrePartida == linea){
@@ -182,7 +268,16 @@ void cargarPartida(string nombreUsuario, string nombreUsuario2){
                 }
             }
         }
-        juego(matriz, nombreUsuario, nombreUsuario2);
+        seguir = juego(matriz, nombreUsuario, nombreUsuario2);
+        if(seguir == "N" || seguir == "n"){
+            guardarPartida(matriz, nombreUsuario, nombreUsuario2);
+        }
+        else{
+            borrarPartida(nombrePartida);
+        }
+    }
+    else if(!chequearPartida(nombrePartida)){
+        cout<<"No se encontro la partida"<<endl;
     }
 }
 
@@ -191,8 +286,9 @@ void iniciarPartida(vector<vector<int>>matriz ){
     string nombreUsuario;
     string nombreUsuario2;
     string nombrePartida;
+    string seguir;
     bool esta = true;
-    archivo.open("partidas.txt");
+    archivo.open("partidas.txt", ios::app);
     cout<<"Ingrese nombre de usuario o pase a registrarse por favor si es usted muy amable."<<endl;
     cin>>nombreUsuario;
     esta = chequear(nombreUsuario);
@@ -207,13 +303,18 @@ void iniciarPartida(vector<vector<int>>matriz ){
         crearUsuario(nombreUsuario2);
         cout<<"No se encontro, usuario creado"<<endl;
     }
-    nombrePartida= nombreUsuario + " vs " + nombreUsuario2 + ":";
-    bool estaPartida = chequearPartida(nombrePartida);
-    if(estaPartida){
+    nombrePartida= nombreUsuario + " vs " + nombreUsuario2;
+    if(chequearPartida(nombrePartida)){
         cargarPartida(nombreUsuario, nombreUsuario2);
     }
     else{
-        juego(matriz, nombreUsuario, nombreUsuario2);
+        seguir = juego(matriz, nombreUsuario, nombreUsuario2);
+        if(seguir == "N" || seguir == "n"){
+            guardarPartida(matriz, nombreUsuario, nombreUsuario2);
+        }
+        else{
+            borrarPartida(nombrePartida);
+        }
     }
 }
 
@@ -249,11 +350,16 @@ void verPodio(){
         getline(archivo, lineaNombre, ';');
         getline(archivo, linea, ';');
         lineaInt = stoi(linea);
-        cout<<lineaInt<<endl;
         if(puntosPrimero<=lineaInt) {
+            puntosTercero=puntosSegundo;
+            nombreTercero=nombreSegundo;
+            puntosSegundo=puntosPrimero;
+            nombreSegundo=nombrePrimero;
             puntosPrimero=lineaInt;
             nombrePrimero=lineaNombre;
         } else if(puntosSegundo<=lineaInt) {
+            puntosTercero=puntosSegundo;
+            nombreTercero=nombreSegundo;
             puntosSegundo=lineaInt;
             nombreSegundo=lineaNombre;
         } else if(puntosTercero<=lineaInt) {
@@ -296,7 +402,7 @@ int main(){
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
-    };
+    };  
     int n;
     bool salir = false;
     while(!salir){
